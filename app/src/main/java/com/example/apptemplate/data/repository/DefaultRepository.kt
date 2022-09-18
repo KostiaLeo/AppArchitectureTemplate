@@ -6,7 +6,9 @@ import com.example.apptemplate.di.LocalSource
 import com.example.apptemplate.di.RemoteSource
 import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class DefaultRepository @Inject constructor(
     @LocalSource private val localSource: DataSource,
     @RemoteSource private val remoteSource: DataSource,
