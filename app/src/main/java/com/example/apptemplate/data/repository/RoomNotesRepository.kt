@@ -9,10 +9,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DefaultRepository @Inject constructor(
+class RoomNotesRepository @Inject constructor(
     @LocalSource private val localSource: DataSource,
     @RemoteSource private val remoteSource: DataSource,
     @IODispatcher private val ioDispatcher: CoroutineDispatcher
-) : Repository {
+) : NotesRepository {
 
 }

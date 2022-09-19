@@ -1,4 +1,4 @@
 package com.example.apptemplate.data.repository
 
-interface Repository {
+interface NotesRepository {
 }
