@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.room.Room
 import com.example.apptemplate.data.repository.RoomNotesRepository
 import com.example.apptemplate.data.repository.NotesRepository
-import com.example.apptemplate.data.source.DataSource
-import com.example.apptemplate.data.source.local.LocalDataSource
+import com.example.apptemplate.data.source.NotesDataSource
+import com.example.apptemplate.data.source.local.LocalNotesNotesDataSource
 import com.example.apptemplate.data.source.local.room.NotesDao
 import com.example.apptemplate.data.source.local.room.NotesDatabase
-import com.example.apptemplate.data.source.remote.RemoteDataSource
+import com.example.apptemplate.data.source.remote.RemoteNotesDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -26,11 +26,11 @@ abstract class DataModule {
 
     @Binds
     @LocalSource
-    abstract fun bindLocalDataSource(localDataSource: LocalDataSource): DataSource
+    abstract fun bindLocalDataSource(localNotesDataSource: LocalNotesNotesDataSource): NotesDataSource
 
     @Binds
     @RemoteSource
-    abstract fun bindRemoteDataSource(remoteDataSource: RemoteDataSource): DataSource
+    abstract fun bindRemoteDataSource(remoteDataSource: RemoteNotesDataSource): NotesDataSource
 }
 
 @Module
