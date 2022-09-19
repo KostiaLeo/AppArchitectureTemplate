@@ -14,6 +14,7 @@ interface NotesPreferencesRepository {
     val pinnedNotesIdsFlow: Flow<List<Int>>
     suspend fun pinNote(noteId: Int)
     suspend fun unpinNote(noteId: Int)
+    suspend fun clearAllPins()
 }
 
 class DatastoreNotesPreferencesRepository constructor(
@@ -32,6 +33,12 @@ class DatastoreNotesPreferencesRepository constructor(
     override suspend fun unpinNote(noteId: Int) {
         dataStore.edit { prefs ->
             prefs[pinnedNotesKey] = prefs[pinnedNotesKey].orEmpty() - noteId.toString()
+        }
+    }
+
+    override suspend fun clearAllPins() {
+        dataStore.edit { prefs ->
+            prefs[pinnedNotesKey] = emptySet()
         }
     }
 }
