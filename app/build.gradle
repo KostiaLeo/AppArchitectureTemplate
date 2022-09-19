@@ -105,6 +105,7 @@ dependencies {
     implementation "androidx.room:room-ktx:$roomVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$archLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$archLifecycleVersion"
+    implementation "androidx.datastore:datastore-preferences:$datastoreVersion"
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$hiltVersion"
@@ -138,6 +139,7 @@ dependencies {
     testImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
     testImplementation "com.google.truth:truth:$truthVersion"
     testImplementation "androidx.compose.ui:ui-test-junit4:$composeVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
 
     // JVM tests - Hilt
     testImplementation "com.google.dagger:hilt-android-testing:$hiltVersion"
