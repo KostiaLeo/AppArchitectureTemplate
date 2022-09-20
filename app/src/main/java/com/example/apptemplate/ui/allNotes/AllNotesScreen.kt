@@ -3,6 +3,7 @@ package com.example.apptemplate.ui.allNotes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
@@ -19,17 +22,15 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -50,6 +51,32 @@ fun MainScreen(
 
     val scaffoldState = rememberBottomSheetScaffoldState()
 
+    var isDeleteAllDialogShown by remember { mutableStateOf(false) }
+
+    if (isDeleteAllDialogShown) {
+        AlertDialog(
+            onDismissRequest = { isDeleteAllDialogShown = false },
+            text = {
+                Text(text = "Do you want to delete all notes?")
+            },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.deleteAllNotes()
+                    isDeleteAllDialogShown = false
+                }) {
+                    Text(text = "Delete")
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    isDeleteAllDialogShown = false
+                }) {
+                    Text(text = "Cancel")
+                }
+            }
+        )
+    }
+
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(uiState.focusedNote) {
@@ -65,19 +92,28 @@ fun MainScreen(
     }
 
     BottomSheetScaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                scope.launch {
+                    scaffoldState.bottomSheetState.collapse()
+                }
+            },
         topBar = {
             TopAppBar(
                 title = {
                     Text(text = "Notes")
                 },
                 actions = {
-//                    Icon(
-//                        imageVector = Icons.Default.Delete,
-//                        contentDescription = null,
-//                        modifier = Modifier.clickable {
-//                            viewModel.deleteAllNotes()
-//                        })
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        modifier = Modifier.clickable {
+                            isDeleteAllDialogShown = true
+                        })
                 }
             )
         },

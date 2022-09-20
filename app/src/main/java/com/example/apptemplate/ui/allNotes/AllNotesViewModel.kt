@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.lifecycle.SavedStateHandle
+import androidx.compose.runtime.snapshots.Snapshot.Companion.withMutableSnapshot
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.apptemplate.data.preferences.NotesPreferencesRepository
@@ -29,21 +29,23 @@ class AllNotesViewModel @Inject constructor(
     private val pinNoteUseCase: PinNoteUseCase,
     private val unpinNoteUseCase: UnpinNoteUseCase,
     private val deleteAllNotesUseCase: DeleteAllNotesUseCase,
-    private val deleteNoteUseCase: DeleteNoteUseCase,
-    private val savedStateHandle: SavedStateHandle
+    private val deleteNoteUseCase: DeleteNoteUseCase
 ) : ViewModel() {
 
     private var focusedNote: PinnableNote? by mutableStateOf(null)
 
     val uiStateFlow: StateFlow<AllNotesUiState> = combine(
         notesRepository.notesFlow,
-        notesPreferencesRepository.pinnedNotesIdsFlow,
-        snapshotFlow { focusedNote }
-    ) { notes, pinnedNotesIds, focusedNote ->
+        notesPreferencesRepository.pinnedNotesIdsFlow
+    ) { notes, pinnedNotesIds ->
         val pinnableNotes = notes.map { PinnableNote(it, pinnedNotesIds.contains(it.id)) }
         val pinned = pinnableNotes.filter { it.isPinned }
         val notPinned = pinnableNotes.filterNot { it.isPinned }
-        AllNotesUiState(pinned, notPinned, focusedNote)
+        AllNotesUiState(pinned, notPinned)
+    }.combine(
+        snapshotFlow { focusedNote }
+    ) { uiState, focusedNote ->
+        uiState.copy(focusedNote = focusedNote)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -75,7 +77,9 @@ class AllNotesViewModel @Inject constructor(
     }
 
     fun onNoteFocused(pinnableNote: PinnableNote?) {
-        focusedNote = pinnableNote
+        withMutableSnapshot {
+            focusedNote = pinnableNote
+        }
     }
 }
 
