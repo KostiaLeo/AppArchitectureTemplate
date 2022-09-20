@@ -1,12 +1,7 @@
 package com.example.apptemplate.data.repository
 
-import com.example.apptemplate.data.source.NotesDataSource
 import com.example.apptemplate.data.source.local.room.NoteEntity
 import com.example.apptemplate.data.source.local.room.NotesDao
-import com.example.apptemplate.di.IODispatcher
-import com.example.apptemplate.di.LocalSource
-import com.example.apptemplate.di.RemoteSource
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton

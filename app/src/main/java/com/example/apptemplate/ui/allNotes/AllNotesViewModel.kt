@@ -10,14 +10,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.apptemplate.data.preferences.NotesPreferencesRepository
 import com.example.apptemplate.data.repository.NotesRepository
 import com.example.apptemplate.data.source.local.room.NoteEntity
+import com.example.apptemplate.di.IODispatcher
 import com.example.apptemplate.domain.DeleteAllNotesUseCase
 import com.example.apptemplate.domain.DeleteNoteUseCase
 import com.example.apptemplate.domain.PinNoteUseCase
 import com.example.apptemplate.domain.UnpinNoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,7 +32,8 @@ class AllNotesViewModel @Inject constructor(
     private val pinNoteUseCase: PinNoteUseCase,
     private val unpinNoteUseCase: UnpinNoteUseCase,
     private val deleteAllNotesUseCase: DeleteAllNotesUseCase,
-    private val deleteNoteUseCase: DeleteNoteUseCase
+    private val deleteNoteUseCase: DeleteNoteUseCase,
+    @IODispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     private var focusedNote: PinnableNote? by mutableStateOf(null)
@@ -46,11 +50,12 @@ class AllNotesViewModel @Inject constructor(
         snapshotFlow { focusedNote }
     ) { uiState, focusedNote ->
         uiState.copy(focusedNote = focusedNote)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = AllNotesUiState()
-    )
+    }.flowOn(ioDispatcher)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = AllNotesUiState()
+        )
 
     fun pinNote(noteEntity: NoteEntity) {
         viewModelScope.launch {

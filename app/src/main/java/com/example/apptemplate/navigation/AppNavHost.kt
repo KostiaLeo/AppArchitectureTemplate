@@ -13,7 +13,7 @@ import com.example.apptemplate.navigation.NoteRoutes.allNotesRoute
 import com.example.apptemplate.navigation.NoteRoutes.noteDetailsRoute
 import com.example.apptemplate.navigation.NotesArguments.noteId
 import com.example.apptemplate.navigation.NotesScreens.noteDetailsScreen
-import com.example.apptemplate.ui.allNotes.MainScreen
+import com.example.apptemplate.ui.allNotes.AllNotesScreen
 import com.example.apptemplate.ui.details.NoteDetailsScreen
 
 @Composable
@@ -30,7 +30,7 @@ fun AppNavHost(
         composable(
             route = allNotesRoute
         ) {
-            MainScreen(
+            AllNotesScreen(
                 onOpenNote = { note ->
                     navController.navigate(noteDetailsRoute.replace("{$noteId}", note.id.toString()))
                 },

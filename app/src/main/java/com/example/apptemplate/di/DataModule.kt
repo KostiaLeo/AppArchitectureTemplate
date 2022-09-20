@@ -8,13 +8,10 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.example.apptemplate.data.preferences.DatastoreNotesPreferencesRepository
 import com.example.apptemplate.data.preferences.NotesPreferencesRepository
-import com.example.apptemplate.data.repository.RoomNotesRepository
 import com.example.apptemplate.data.repository.NotesRepository
-import com.example.apptemplate.data.source.NotesDataSource
-import com.example.apptemplate.data.source.local.LocalNotesNotesDataSource
+import com.example.apptemplate.data.repository.RoomNotesRepository
 import com.example.apptemplate.data.source.local.room.NotesDao
 import com.example.apptemplate.data.source.local.room.NotesDatabase
-import com.example.apptemplate.data.source.remote.RemoteNotesDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -29,14 +26,6 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindRepository(defaultRepository: RoomNotesRepository): NotesRepository
-
-    @Binds
-    @LocalSource
-    abstract fun bindLocalDataSource(localNotesDataSource: LocalNotesNotesDataSource): NotesDataSource
-
-    @Binds
-    @RemoteSource
-    abstract fun bindRemoteDataSource(remoteDataSource: RemoteNotesDataSource): NotesDataSource
 }
 
 @Module
