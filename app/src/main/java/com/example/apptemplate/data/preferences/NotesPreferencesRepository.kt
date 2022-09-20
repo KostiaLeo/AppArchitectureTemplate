@@ -11,7 +11,7 @@ private const val pinnedNotesKeyName = "pinnedNotes"
 private val pinnedNotesKey = stringSetPreferencesKey(pinnedNotesKeyName)
 
 interface NotesPreferencesRepository {
-    val pinnedNotesIdsFlow: Flow<List<Int>>
+    val pinnedNotesIdsFlow: Flow<Set<Int>>
     suspend fun pinNote(noteId: Int)
     suspend fun unpinNote(noteId: Int)
     suspend fun clearAllPins()
@@ -20,8 +20,8 @@ interface NotesPreferencesRepository {
 class DatastoreNotesPreferencesRepository constructor(
     private val dataStore: DataStore<Preferences>
 ): NotesPreferencesRepository {
-    override val pinnedNotesIdsFlow: Flow<List<Int>> = dataStore.data.map { prefs ->
-        prefs[pinnedNotesKey].orEmpty().mapNotNull { it.toIntOrNull() }
+    override val pinnedNotesIdsFlow: Flow<Set<Int>> = dataStore.data.map { prefs ->
+        prefs[pinnedNotesKey].orEmpty().mapNotNull { it.toIntOrNull() }.toSet()
     }
 
     override suspend fun pinNote(noteId: Int) {

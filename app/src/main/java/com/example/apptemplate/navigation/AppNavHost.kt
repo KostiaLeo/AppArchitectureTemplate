@@ -9,14 +9,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.apptemplate.ui.main.MainScreen
-import com.example.apptemplate.ui.secondary.SecondaryScreen
+import com.example.apptemplate.navigation.NoteRoutes.allNotesRoute
+import com.example.apptemplate.navigation.NoteRoutes.noteDetailsRoute
+import com.example.apptemplate.navigation.NotesArguments.noteId
+import com.example.apptemplate.navigation.NotesScreens.noteDetailsScreen
+import com.example.apptemplate.ui.allNotes.MainScreen
+import com.example.apptemplate.ui.details.NoteDetailsScreen
 
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "main/{param}"
+    startDestination: String = allNotesRoute
 ) {
     NavHost(
         navController = navController,
@@ -24,24 +28,22 @@ fun AppNavHost(
         modifier = modifier.fillMaxSize()
     ) {
         composable(
-            route = "main/{param}",
-            arguments = listOf(navArgument("param") { type = NavType.StringType; defaultValue = "Lesgo" })
-        ) { backStackEntry ->
-            val param = backStackEntry.arguments?.getString("param")
+            route = allNotesRoute
+        ) {
             MainScreen(
-                param = param,
-                onNavigateToScreen2 = { navController.navigate("secondary/Hello!") }
+                onOpenNote = { note ->
+                    navController.navigate(noteDetailsRoute.replace("{$noteId}", note.id.toString()))
+                },
+                onCreateNewNote = {
+                    navController.navigate(noteDetailsScreen)
+                }
             )
         }
         composable(
-            route = "secondary/{param}",
-            arguments = listOf(navArgument("param") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val param = backStackEntry.arguments?.getString("param")
-            SecondaryScreen(
-                param = param,
-                onNavigateToScreen1 = { navController.navigate("main/Go") }
-            )
+            route = noteDetailsRoute,
+            arguments = listOf(navArgument(noteId) { type = NavType.IntType; defaultValue = -1 })
+        ) {
+            NoteDetailsScreen(onNavigateUp = navController::navigateUp)
         }
     }
 }
