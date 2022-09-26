@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -163,7 +164,7 @@ private fun AllNotesContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = dimensionResource(R.dimen.spacing_small))
         ) {
             if (uiState.pinnedNotes.isNotEmpty()) {
                 item {
@@ -176,8 +177,8 @@ private fun AllNotesContent(
                 ) { index, note ->
                     val noteItemPosition = getNoteItemPosition(uiState.pinnedNotes, index)
                     NoteItem(
-                        position = noteItemPosition,
                         pinnableNote = note,
+                        position = noteItemPosition,
                         onNoteClicked = onOpenNote,
                         onLongPressed = onNoteFocused
                     )
@@ -194,8 +195,8 @@ private fun AllNotesContent(
             ) { index, note ->
                 val noteItemPosition = getNoteItemPosition(uiState.notPinnedNotes, index)
                 NoteItem(
-                    position = noteItemPosition,
                     pinnableNote = note,
+                    position = noteItemPosition,
                     onNoteClicked = onOpenNote,
                     onLongPressed = onNoteFocused
                 )
@@ -207,16 +208,22 @@ private fun AllNotesContent(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LazyItemScope.NoteItem(
-    position: NoteItemPosition,
     pinnableNote: PinnableNote,
+    position: NoteItemPosition,
     onNoteClicked: (NoteEntity) -> Unit,
     onLongPressed: (PinnableNote) -> Unit
 ) {
     val shape = when (position) {
-        NoteItemPosition.SINGLE_ITEM -> RoundedCornerShape(size = 8.dp)
-        NoteItemPosition.START_OF_LIST -> RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+        NoteItemPosition.SINGLE_ITEM -> RoundedCornerShape(size = dimensionResource(R.dimen.sizing_small))
+        NoteItemPosition.START_OF_LIST -> RoundedCornerShape(
+            topStart = dimensionResource(R.dimen.sizing_small),
+            topEnd = dimensionResource(R.dimen.sizing_small)
+        )
         NoteItemPosition.MIDDLE_OF_LIST -> RectangleShape
-        NoteItemPosition.END_OF_LIST -> RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp)
+        NoteItemPosition.END_OF_LIST -> RoundedCornerShape(
+            bottomStart = dimensionResource(R.dimen.sizing_small),
+            bottomEnd = dimensionResource(R.dimen.sizing_small)
+        )
     }
 
     Surface(
@@ -236,7 +243,7 @@ private fun LazyItemScope.NoteItem(
                     }
                 )
         ) {
-            Column(modifier = Modifier.padding(8.dp)) {
+            Column(modifier = Modifier.padding(dimensionResource(R.dimen.spacing_small))) {
                 Text(
                     text = pinnableNote.note.title,
                     style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold)
@@ -260,23 +267,26 @@ private fun LazyItemScope.NoteItem(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NotesSectionTitle(text: String) {
+private fun LazyItemScope.NotesSectionTitle(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
-        modifier = Modifier.padding(
-            top = 12.dp,
-            bottom = 12.dp,
-            start = 8.dp
-        )
+        modifier = Modifier
+            .padding(
+                top = dimensionResource(R.dimen.spacing_medium),
+                bottom = dimensionResource(R.dimen.spacing_medium),
+                start = dimensionResource(R.dimen.spacing_small)
+            )
+            .animateItemPlacement()
     )
 }
 
 @Composable
 private fun CreateNoteFAB(onCreateNewNote: () -> Unit) {
     FloatingActionButton(onClick = onCreateNewNote) {
-        Icon(imageVector = Icons.Default.Add, contentDescription = null)
+        Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.create_note))
     }
 }
 
@@ -322,7 +332,7 @@ fun NoteActionContent(
 ) {
     Box(
         modifier = Modifier
-            .height(64.dp)
+            .height(dimensionResource(R.dimen.note_action_height))
             .fillMaxWidth()
             .clickable(onClick = onChangePinClicked),
         contentAlignment = Alignment.CenterStart
@@ -331,13 +341,13 @@ fun NoteActionContent(
         Text(
             text = stringResource(textId),
             style = MaterialTheme.typography.body1,
-            modifier = Modifier.padding(start = 8.dp)
+            modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_small))
         )
     }
 
     Box(
         modifier = Modifier
-            .height(64.dp)
+            .height(dimensionResource(R.dimen.note_action_height))
             .fillMaxWidth()
             .clickable(onClick = onDeleteNoteClicked),
         contentAlignment = Alignment.CenterStart
@@ -345,7 +355,7 @@ fun NoteActionContent(
         Text(
             text = stringResource(R.string.delete),
             style = MaterialTheme.typography.body1,
-            modifier = Modifier.padding(start = 8.dp)
+            modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_small))
         )
     }
 }

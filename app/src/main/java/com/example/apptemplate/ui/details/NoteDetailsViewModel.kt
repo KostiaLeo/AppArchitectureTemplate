@@ -3,6 +3,7 @@ package com.example.apptemplate.ui.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.apptemplate.R
 import com.example.apptemplate.data.source.local.room.NoteEntity
 import com.example.apptemplate.domain.CreateNoteUseCase
 import com.example.apptemplate.domain.EditNoteUseCase
@@ -46,7 +47,7 @@ class NoteDetailsViewModel @Inject constructor(
                 }
             }, {
                 _uiStateFlow.update {
-                    it.copy(errorMessage = "Oops, Something went wrong")
+                    it.copy(errorMessage = R.string.generic_error_message)
                 }
             })
 
@@ -104,6 +105,6 @@ data class NoteDetailsUiState(
     val title: String = "",
     val text: String = "",
     val isNoteSaved: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: Int? = null,
     val isNewNote: Boolean = false
 )

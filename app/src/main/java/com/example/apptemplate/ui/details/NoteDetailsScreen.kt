@@ -11,17 +11,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,15 +33,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,8 +64,10 @@ fun NoteDetailsScreen(
         textValue = textValue.copy(text = uiState.text)
     }
     val textFocusRequester = remember { FocusRequester() }
-    
+    val scaffoldState = rememberScaffoldState()
+
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             NoteDetailsTopAppBar(uiState, onNavigateUp)
         },
@@ -90,6 +99,12 @@ fun NoteDetailsScreen(
     )
 
     NavigateUpOnNoteSaved(uiState, onNavigateUp)
+
+    ShowSnackbarOnErrorMessage(
+        scaffoldState = scaffoldState,
+        uiState = uiState,
+        onErrorMessageShown = viewModel::onErrorMessageShown
+    )
 }
 
 @Composable
@@ -128,9 +143,11 @@ private fun NoteDetailsContent(
             .verticalScroll(rememberScrollState())
             .fillMaxSize()
     ) {
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
+
         TitleInput(uiState, onTitleChanged)
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
 
         TextInput(textFocusRequester, textValue, onTextChanged, uiState)
     }
@@ -141,24 +158,43 @@ private fun TitleInput(
     uiState: NoteDetailsUiState,
     onTitleChanged: (String) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
+    val titleFocusRequester = remember { FocusRequester() }
+
+    val fontSize = MaterialTheme.typography.h5.fontSize
     BasicTextField(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .focusRequester(titleFocusRequester),
         value = uiState.title,
         singleLine = true,
-        textStyle = TextStyle(color = MaterialTheme.colors.onSurface, fontSize = 24.sp),
+        textStyle = TextStyle(
+            color = MaterialTheme.colors.onSurface,
+            fontSize = fontSize,
+            fontWeight = FontWeight.Bold
+        ),
         onValueChange = onTitleChanged,
         decorationBox = { innerTextField ->
             if (uiState.title.isEmpty()) {
                 Text(
                     text = stringResource(R.string.type_title_hint),
                     color = Color.Gray,
-                    fontSize = 24.sp
+                    fontSize = fontSize
                 )
             }
             innerTextField()
-        }
+        },
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+        keyboardActions = KeyboardActions(onNext = {
+            focusManager.moveFocus(FocusDirection.Next)
+        })
     )
+
+    LaunchedEffect(Unit) {
+        if (uiState.isNewNote) {
+            titleFocusRequester.requestFocus()
+        }
+    }
 }
 
 @Composable
@@ -168,19 +204,20 @@ private fun TextInput(
     onTextChanged: (TextFieldValue) -> Unit,
     uiState: NoteDetailsUiState
 ) {
+    val fontSize = MaterialTheme.typography.body1.fontSize
     BasicTextField(
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(textFocusRequester),
         value = textValue,
-        textStyle = TextStyle(color = MaterialTheme.colors.onSurface, fontSize = 16.sp),
+        textStyle = TextStyle(color = MaterialTheme.colors.onSurface, fontSize = fontSize),
         onValueChange = onTextChanged,
         decorationBox = { innerTextField ->
             if (uiState.text.isEmpty()) {
                 Text(
                     text = stringResource(R.string.type_text_hint),
                     color = Color.Gray,
-                    fontSize = 16.sp
+                    fontSize = fontSize
                 )
             }
             innerTextField()
@@ -191,7 +228,7 @@ private fun TextInput(
 @Composable
 private fun SaveNoteFAB(saveNote: () -> Unit) {
     FloatingActionButton(onClick = saveNote) {
-        Icon(imageVector = Icons.Default.Done, contentDescription = null)
+        Icon(imageVector = Icons.Default.Done, stringResource(R.string.save_note))
     }
 }
 
@@ -203,6 +240,21 @@ private fun NavigateUpOnNoteSaved(
     LaunchedEffect(uiState) {
         if (uiState.isNoteSaved) {
             onNavigateUp()
+        }
+    }
+}
+
+@Composable
+fun ShowSnackbarOnErrorMessage(
+    scaffoldState: ScaffoldState,
+    uiState: NoteDetailsUiState,
+    onErrorMessageShown: () -> Unit
+) {
+    uiState.errorMessage?.let { errorMessage ->
+        val messageText = stringResource(id = errorMessage)
+        LaunchedEffect(scaffoldState, messageText, errorMessage, onErrorMessageShown) {
+            scaffoldState.snackbarHostState.showSnackbar(messageText)
+            onErrorMessageShown()
         }
     }
 }
