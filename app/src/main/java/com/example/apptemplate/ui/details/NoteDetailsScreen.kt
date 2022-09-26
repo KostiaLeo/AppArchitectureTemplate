@@ -24,12 +24,16 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,6 +57,13 @@ fun NoteDetailsScreen(
 
     val textFocusRequester = remember { FocusRequester() }
 
+    var textValue by remember {
+        mutableStateOf(TextFieldValue(uiState.text))
+    }
+    LaunchedEffect(uiState.text) {
+        textValue = textValue.copy(text = uiState.text)
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -61,6 +72,7 @@ fun NoteDetailsScreen(
                 interactionSource = remember { MutableInteractionSource() }
             ) {
                 textFocusRequester.requestFocus()
+                textValue = textValue.copy(selection = TextRange(index = textValue.text.length))
             },
         topBar = {
             TopAppBar(
@@ -106,9 +118,12 @@ fun NoteDetailsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(textFocusRequester),
-                    value = uiState.text,
+                    value = textValue,
                     textStyle = TextStyle(color = MaterialTheme.colors.onSurface, fontSize = 16.sp),
-                    onValueChange = viewModel::onTextChanged,
+                    onValueChange = {
+                        textValue = it
+                        viewModel.onTextChanged(it.text)
+                    },
                     decorationBox = { innerTextField ->
                         if (uiState.text.isEmpty()) {
                             Text(text = "Type text", color = Color.Gray, fontSize = 16.sp)
