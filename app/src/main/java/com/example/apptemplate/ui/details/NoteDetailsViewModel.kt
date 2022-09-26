@@ -3,10 +3,10 @@ package com.example.apptemplate.ui.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.apptemplate.data.repository.NotesRepository
 import com.example.apptemplate.data.source.local.room.NoteEntity
 import com.example.apptemplate.domain.CreateNoteUseCase
 import com.example.apptemplate.domain.EditNoteUseCase
+import com.example.apptemplate.domain.GetNoteUseCase
 import com.example.apptemplate.navigation.NotesArguments
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,13 +19,13 @@ import javax.inject.Inject
 class NoteDetailsViewModel @Inject constructor(
     private val editNoteUseCase: EditNoteUseCase,
     private val createNoteUseCase: CreateNoteUseCase,
-    private val notesRepository: NotesRepository,
+    private val getNoteUseCase: GetNoteUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val _uiStateFlow = MutableStateFlow(NoteDetailsUiState())
-    val uiStateFlow = _uiStateFlow.asStateFlow()
-
     private val noteId: Int? = savedStateHandle.get<Int>(NotesArguments.noteId)?.takeUnless { it == -1 }
+
+    private val _uiStateFlow = MutableStateFlow(NoteDetailsUiState(isNewNote = noteId == null))
+    val uiStateFlow = _uiStateFlow.asStateFlow()
 
     private var currentNote: NoteEntity? = null
 
@@ -35,7 +35,7 @@ class NoteDetailsViewModel @Inject constructor(
 
     private fun loadNote(id: Int) {
         viewModelScope.launch {
-            val noteResult = notesRepository.getNoteEntityById(id)
+            val noteResult = getNoteUseCase(id)
             noteResult.fold({ note ->
                 currentNote = note
                 _uiStateFlow.update {
@@ -104,5 +104,6 @@ data class NoteDetailsUiState(
     val title: String = "",
     val text: String = "",
     val isNoteSaved: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isNewNote: Boolean = false
 )

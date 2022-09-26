@@ -7,12 +7,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.Snapshot.Companion.withMutableSnapshot
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.apptemplate.data.preferences.NotesPreferencesRepository
-import com.example.apptemplate.data.repository.NotesRepository
 import com.example.apptemplate.data.source.local.room.NoteEntity
 import com.example.apptemplate.di.IODispatcher
 import com.example.apptemplate.domain.DeleteAllNotesUseCase
 import com.example.apptemplate.domain.DeleteNoteUseCase
+import com.example.apptemplate.domain.ObserveNotesUseCase
+import com.example.apptemplate.domain.ObservePinnedNotesUseCase
 import com.example.apptemplate.domain.PinNoteUseCase
 import com.example.apptemplate.domain.UnpinNoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,8 +27,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AllNotesViewModel @Inject constructor(
-    notesRepository: NotesRepository,
-    notesPreferencesRepository: NotesPreferencesRepository,
+    observeNotesUseCase: ObserveNotesUseCase,
+    observePinnedNotesUseCase: ObservePinnedNotesUseCase,
     private val pinNoteUseCase: PinNoteUseCase,
     private val unpinNoteUseCase: UnpinNoteUseCase,
     private val deleteAllNotesUseCase: DeleteAllNotesUseCase,
@@ -39,8 +39,8 @@ class AllNotesViewModel @Inject constructor(
     private var focusedNote: PinnableNote? by mutableStateOf(null)
 
     val uiStateFlow: StateFlow<AllNotesUiState> = combine(
-        notesRepository.notesFlow,
-        notesPreferencesRepository.pinnedNotesIdsFlow
+        observeNotesUseCase(),
+        observePinnedNotesUseCase()
     ) { notes, pinnedNotesIds ->
         val pinnableNotes = notes.map { PinnableNote(it, pinnedNotesIds.contains(it.id)) }
         val pinned = pinnableNotes.filter { it.isPinned }

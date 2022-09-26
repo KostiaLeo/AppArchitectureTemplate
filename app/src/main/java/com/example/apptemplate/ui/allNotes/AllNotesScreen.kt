@@ -120,12 +120,14 @@ fun AllNotesScreen(
                     Text(text = "Notes")
                 },
                 actions = {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = null,
-                        modifier = Modifier.clickable {
-                            isDeleteAllNotesDialogShown = true
-                        })
+                    if (uiState.pinnedNotes.isNotEmpty() || uiState.notPinnedNotes.isNotEmpty()) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = null,
+                            modifier = Modifier.clickable {
+                                isDeleteAllNotesDialogShown = true
+                            })
+                    }
                 }
             )
         },
