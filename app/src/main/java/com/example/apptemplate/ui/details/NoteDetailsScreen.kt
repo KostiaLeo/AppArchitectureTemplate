@@ -3,6 +3,7 @@ package com.example.apptemplate.ui.details
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
@@ -39,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.apptemplate.R
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
@@ -46,25 +49,35 @@ fun NoteDetailsScreen(
     onNavigateUp: () -> Unit,
     viewModel: NoteDetailsViewModel = hiltViewModel()
 ) {
-
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
-
-    LaunchedEffect(uiState) {
-        if (uiState.isNoteSaved) {
-            onNavigateUp()
-        }
-    }
-
-    val textFocusRequester = remember { FocusRequester() }
-
     var textValue by remember {
         mutableStateOf(TextFieldValue(uiState.text))
     }
     LaunchedEffect(uiState.text) {
         textValue = textValue.copy(text = uiState.text)
     }
-
+    val textFocusRequester = remember { FocusRequester() }
+    
     Scaffold(
+        topBar = {
+            NoteDetailsTopAppBar(uiState, onNavigateUp)
+        },
+        content = { paddingValues ->
+            NoteDetailsContent(
+                paddingValues = paddingValues,
+                uiState = uiState,
+                textValue = textValue,
+                textFocusRequester = textFocusRequester,
+                onTitleChanged = viewModel::onTitleChanged,
+                onTextChanged = {
+                    textValue = it
+                    viewModel.onTextChanged(it.text)
+                },
+            )
+        },
+        floatingActionButton = {
+            SaveNoteFAB(viewModel::saveNote)
+        },
         modifier = Modifier
             .fillMaxSize()
             .clickable(
@@ -74,70 +87,122 @@ fun NoteDetailsScreen(
                 textFocusRequester.requestFocus()
                 textValue = textValue.copy(selection = TextRange(index = textValue.text.length))
             },
-        topBar = {
-            TopAppBar(
-                title = {
-                    val title = if (uiState.isNewNote) "Create note" else "Edit note"
-                    Text(text = title)
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateUp) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                }
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxSize()
-            ) {
-                BasicTextField(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    value = uiState.title,
-                    singleLine = true,
-                    textStyle = TextStyle(color = MaterialTheme.colors.onSurface, fontSize = 24.sp),
-                    onValueChange = viewModel::onTitleChanged,
-                    decorationBox = { innerTextField ->
-                        if (uiState.title.isEmpty()) {
-                            Text(text = "Type title", color = Color.Gray, fontSize = 24.sp)
-                        }
-                        innerTextField()
-                    }
-                )
+    )
 
-                Spacer(modifier = Modifier.height(8.dp))
+    NavigateUpOnNoteSaved(uiState, onNavigateUp)
+}
 
-                BasicTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(textFocusRequester),
-                    value = textValue,
-                    textStyle = TextStyle(color = MaterialTheme.colors.onSurface, fontSize = 16.sp),
-                    onValueChange = {
-                        textValue = it
-                        viewModel.onTextChanged(it.text)
-                    },
-                    decorationBox = { innerTextField ->
-                        if (uiState.text.isEmpty()) {
-                            Text(text = "Type text", color = Color.Gray, fontSize = 16.sp)
-                        }
-                        innerTextField()
-                    }
-                )
-            }
+@Composable
+private fun NoteDetailsTopAppBar(
+    uiState: NoteDetailsUiState,
+    onNavigateUp: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            val titleId = if (uiState.isNewNote) R.string.create_note else R.string.edit_note
+            Text(text = stringResource(titleId))
         },
-        snackbarHost = {},
-        floatingActionButton = {
-            FloatingActionButton(onClick = viewModel::saveNote) {
-                Icon(imageVector = Icons.Default.Done, contentDescription = null)
+        navigationIcon = {
+            IconButton(onClick = onNavigateUp) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back)
+                )
             }
         }
     )
+}
+
+@Composable
+private fun NoteDetailsContent(
+    paddingValues: PaddingValues,
+    uiState: NoteDetailsUiState,
+    textValue: TextFieldValue,
+    textFocusRequester: FocusRequester,
+    onTitleChanged: (String) -> Unit,
+    onTextChanged: (TextFieldValue) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .padding(paddingValues)
+            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
+    ) {
+        TitleInput(uiState, onTitleChanged)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TextInput(textFocusRequester, textValue, onTextChanged, uiState)
+    }
+}
+
+@Composable
+private fun TitleInput(
+    uiState: NoteDetailsUiState,
+    onTitleChanged: (String) -> Unit
+) {
+    BasicTextField(
+        modifier = Modifier
+            .fillMaxWidth(),
+        value = uiState.title,
+        singleLine = true,
+        textStyle = TextStyle(color = MaterialTheme.colors.onSurface, fontSize = 24.sp),
+        onValueChange = onTitleChanged,
+        decorationBox = { innerTextField ->
+            if (uiState.title.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.type_title_hint),
+                    color = Color.Gray,
+                    fontSize = 24.sp
+                )
+            }
+            innerTextField()
+        }
+    )
+}
+
+@Composable
+private fun TextInput(
+    textFocusRequester: FocusRequester,
+    textValue: TextFieldValue,
+    onTextChanged: (TextFieldValue) -> Unit,
+    uiState: NoteDetailsUiState
+) {
+    BasicTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(textFocusRequester),
+        value = textValue,
+        textStyle = TextStyle(color = MaterialTheme.colors.onSurface, fontSize = 16.sp),
+        onValueChange = onTextChanged,
+        decorationBox = { innerTextField ->
+            if (uiState.text.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.type_text_hint),
+                    color = Color.Gray,
+                    fontSize = 16.sp
+                )
+            }
+            innerTextField()
+        }
+    )
+}
+
+@Composable
+private fun SaveNoteFAB(saveNote: () -> Unit) {
+    FloatingActionButton(onClick = saveNote) {
+        Icon(imageVector = Icons.Default.Done, contentDescription = null)
+    }
+}
+
+@Composable
+private fun NavigateUpOnNoteSaved(
+    uiState: NoteDetailsUiState,
+    onNavigateUp: () -> Unit
+) {
+    LaunchedEffect(uiState) {
+        if (uiState.isNoteSaved) {
+            onNavigateUp()
+        }
+    }
 }

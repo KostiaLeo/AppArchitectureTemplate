@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
@@ -77,9 +78,7 @@ fun AllNotesScreen(
             AllNotesContent(paddingValues, uiState, onOpenNote, viewModel::onNoteFocused)
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onCreateNewNote) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = null)
-            }
+            CreateNoteFAB(onCreateNewNote)
         },
         sheetContent = {
             AllNotesBottomSheetContent(uiState, viewModel, scaffoldState)
@@ -207,7 +206,7 @@ private fun AllNotesContent(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NoteItem(
+private fun LazyItemScope.NoteItem(
     position: NoteItemPosition,
     pinnableNote: PinnableNote,
     onNoteClicked: (NoteEntity) -> Unit,
@@ -225,6 +224,7 @@ private fun NoteItem(
         color = colorResource(id = R.color.surfaceVariant),
         modifier = Modifier
             .fillMaxWidth()
+            .animateItemPlacement()
     ) {
         Column(
             Modifier
@@ -271,6 +271,13 @@ private fun NotesSectionTitle(text: String) {
             start = 8.dp
         )
     )
+}
+
+@Composable
+private fun CreateNoteFAB(onCreateNewNote: () -> Unit) {
+    FloatingActionButton(onClick = onCreateNewNote) {
+        Icon(imageVector = Icons.Default.Add, contentDescription = null)
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)

@@ -42,20 +42,27 @@ class AllNotesViewModel @Inject constructor(
         observeNotesUseCase(),
         observePinnedNotesUseCase()
     ) { notes, pinnedNotesIds ->
-        val pinnableNotes = notes.map { PinnableNote(it, pinnedNotesIds.contains(it.id)) }
-        val pinned = pinnableNotes.filter { it.isPinned }
-        val notPinned = pinnableNotes.filterNot { it.isPinned }
+        val pinnableNotes = notes.map {
+            PinnableNote(it, pinnedNotesIds.contains(it.id))
+        }
+        val pinned = pinnableNotes.filter {
+            it.isPinned
+        }
+        val notPinned = pinnableNotes.filterNot {
+            it.isPinned
+        }
         AllNotesUiState(pinned, notPinned)
     }.combine(
         snapshotFlow { focusedNote }
     ) { uiState, focusedNote ->
-        uiState.copy(focusedNote = focusedNote)
-    }.flowOn(ioDispatcher)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = AllNotesUiState()
+        uiState.copy(
+            focusedNote = focusedNote
         )
+    }.flowOn(ioDispatcher).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = AllNotesUiState()
+    )
 
     fun pinNote(noteEntity: NoteEntity) {
         viewModelScope.launch {
