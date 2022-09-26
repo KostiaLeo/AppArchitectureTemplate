@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">AppTemplate</string>
+    <string name="app_name">Notes</string>
+    <string name="delete_all_notes_confirmation">Do you want to delete all notes?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="pinned_notes">Pinned</string>
+    <string name="notes">Notes</string>
+    <string name="unpin_note">Unpin</string>
+    <string name="pin_note">Pin</string>
 </resources>
