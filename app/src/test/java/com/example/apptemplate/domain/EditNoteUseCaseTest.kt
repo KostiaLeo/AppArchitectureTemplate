@@ -3,12 +3,14 @@ package com.example.apptemplate.domain
 import com.example.apptemplate.data.repository.NotesRepository
 import com.example.apptemplate.data.source.local.room.NoteEntity
 import com.example.apptemplate.fakesource.FakeNotesRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class EditNoteUseCaseTest {
     lateinit var editNoteUseCase: EditNoteUseCase
 
@@ -24,7 +26,8 @@ class EditNoteUseCaseTest {
     fun `test note is updated`() = runTest {
         val currentEntity = NoteEntity(
             title = "Old title",
-            text = "Old text"
+            text = "Old text",
+            timeCreatedMillis = System.currentTimeMillis() - 10000
         )
 
         repository.insertNoteEntity(currentEntity)
