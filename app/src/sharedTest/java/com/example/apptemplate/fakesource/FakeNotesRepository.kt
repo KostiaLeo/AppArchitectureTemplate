@@ -6,12 +6,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
-class FakeNotesRepository(
-    initialNotes: LinkedHashMap<Int, NoteEntity> = LinkedHashMap()
-) : NotesRepository {
+class FakeNotesRepository @Inject constructor() : NotesRepository {
 
-    private val _notesFlow = MutableStateFlow(initialNotes)
+    private val _notesFlow = MutableStateFlow(LinkedHashMap<Int, NoteEntity>())
     override val notesFlow: Flow<List<NoteEntity>>
         get() = _notesFlow.map { notesMap ->
             notesMap.values.sortedByDescending { it.timeLastEditedMillis }

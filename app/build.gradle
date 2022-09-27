@@ -7,13 +7,13 @@ android {
     compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.example.android.architecture.blueprints.master"
+        applicationId "com.example.apptemplate"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "com.example.android.architecture.blueprints.todoapp.CustomTestRunner"
+        testInstrumentationRunner "com.example.apptemplate.CustomTestRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
