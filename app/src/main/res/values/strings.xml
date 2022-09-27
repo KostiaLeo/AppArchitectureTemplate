@@ -11,6 +11,7 @@
     <string name="save_note">Create note</string>
     <string name="edit_note">Edit note</string>
     <string name="generic_error_message">Oops, something went wrong…</string>
+    <string name="empty_note_error">Note cannot be empty</string>
     <string name="back">Back</string>
     <string name="type_title_hint">Type title</string>
     <string name="type_text_hint">Type text</string>

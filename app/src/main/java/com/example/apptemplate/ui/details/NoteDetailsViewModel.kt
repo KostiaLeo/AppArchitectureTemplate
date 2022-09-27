@@ -67,6 +67,13 @@ class NoteDetailsViewModel @Inject constructor(
     }
 
     fun saveNote() {
+        val state = uiStateFlow.value
+        if (state.title.isEmpty() && state.text.isEmpty()) {
+            _uiStateFlow.update {
+                it.copy(errorMessage = R.string.empty_note_error)
+            }
+            return
+        }
         if (currentNote != null) {
             updateExistingNote()
         } else {

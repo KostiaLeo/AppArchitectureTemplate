@@ -5,7 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -32,6 +32,8 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -286,7 +288,10 @@ private fun LazyItemScope.NotesSectionTitle(text: String) {
 @Composable
 private fun CreateNoteFAB(onCreateNewNote: () -> Unit) {
     FloatingActionButton(onClick = onCreateNewNote) {
-        Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.create_note))
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = stringResource(R.string.create_note)
+        )
     }
 }
 
@@ -330,32 +335,50 @@ fun NoteActionContent(
     onChangePinClicked: () -> Unit,
     onDeleteNoteClicked: () -> Unit
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .height(dimensionResource(R.dimen.note_action_height))
             .fillMaxWidth()
-            .clickable(onClick = onChangePinClicked),
-        contentAlignment = Alignment.CenterStart
+            .clickable(onClick = onChangePinClicked)
+            .padding(start = dimensionResource(R.dimen.spacing_small)),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small)),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        val textId = if (pinnableNote?.isPinned == true) R.string.unpin_note else R.string.pin_note
+        val isPinned = pinnableNote?.isPinned == true
+        val icon = if (isPinned) Icons.Outlined.Star else Icons.Filled.Star
+        val textId = if (isPinned) R.string.unpin_note else R.string.pin_note
+        val textString = stringResource(textId)
+
+        Icon(
+            imageVector = icon,
+            contentDescription = textString
+        )
+
         Text(
             text = stringResource(textId),
-            style = MaterialTheme.typography.body1,
-            modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_small))
+            style = MaterialTheme.typography.body1
         )
     }
 
-    Box(
+    Row(
         modifier = Modifier
             .height(dimensionResource(R.dimen.note_action_height))
             .fillMaxWidth()
-            .clickable(onClick = onDeleteNoteClicked),
-        contentAlignment = Alignment.CenterStart
+            .clickable(onClick = onDeleteNoteClicked)
+            .padding(start = dimensionResource(R.dimen.spacing_small)),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_small)),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        val text = stringResource(R.string.delete)
+
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = text
+        )
+
         Text(
-            text = stringResource(R.string.delete),
-            style = MaterialTheme.typography.body1,
-            modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_small))
+            text = text,
+            style = MaterialTheme.typography.body1
         )
     }
 }
