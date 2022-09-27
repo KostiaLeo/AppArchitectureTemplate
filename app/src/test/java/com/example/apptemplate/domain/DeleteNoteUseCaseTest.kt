@@ -1,37 +1,41 @@
 package com.example.apptemplate.domain
 
+import com.example.apptemplate.data.preferences.NotesPreferencesRepository
 import com.example.apptemplate.data.repository.NotesRepository
-import io.mockk.coEvery
-import io.mockk.coVerifyAll
-import io.mockk.mockk
+import com.example.apptemplate.data.source.local.room.NoteEntity
+import com.example.apptemplate.fakesource.FakeNotesPreferencesRepository
+import com.example.apptemplate.fakesource.FakeNotesRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class DeleteNoteUseCaseTest {
     lateinit var deleteNoteUseCase: DeleteNoteUseCase
 
+    lateinit var preferencesRepository: NotesPreferencesRepository
     lateinit var repository: NotesRepository
-    lateinit var unpinNoteUseCase: UnpinNoteUseCase
 
     @Before
     fun setUp() {
-        repository = mockk()
-        unpinNoteUseCase = mockk()
-        deleteNoteUseCase = DeleteNoteUseCase(repository, unpinNoteUseCase)
+        repository = FakeNotesRepository()
+        preferencesRepository = FakeNotesPreferencesRepository()
+        deleteNoteUseCase = DeleteNoteUseCase(repository, UnpinNoteUseCase(preferencesRepository))
     }
 
     @Test
     fun `test delete notes`() = runTest {
-        coEvery { repository.deleteNoteEntityById(any()) } answers {}
-        coEvery { unpinNoteUseCase.invoke(any()) } answers {}
+        val notes = (0..1).map { NoteEntity(id = it, title = "Title$it", text = "Text$it") }
+            .onEach { repository.insertNoteEntity(it) }
 
-        val noteId = 1
-        deleteNoteUseCase(noteId)
+        preferencesRepository.pinNote(1)
+        assertEquals(repository.notesFlow.first().size, 2)
+        assertEquals(preferencesRepository.pinnedNotesIdsFlow.first().size, 1)
 
-        coVerifyAll {
-            repository.deleteNoteEntityById(noteId)
-            unpinNoteUseCase.invoke(noteId)
-        }
+        deleteNoteUseCase(1)
+
+        assertEquals(repository.notesFlow.first(), listOf(notes[0]))
+        assertEquals(preferencesRepository.pinnedNotesIdsFlow.first(), emptySet())
     }
 }

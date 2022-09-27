@@ -36,7 +36,7 @@ class NotesDaoTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         notesDatabase = Room.inMemoryDatabaseBuilder(
             context, NotesDatabase::class.java
-        ).build()
+        ).allowMainThreadQueries().build()
         notesDao = notesDatabase.notesDao
     }
 

@@ -7,7 +7,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.apptemplate.data.repository.NotesRepository
 import com.example.apptemplate.data.repository.RoomNotesRepository
 import com.example.apptemplate.data.source.local.room.NoteEntity
-import com.example.apptemplate.data.source.local.room.NotesDao
 import com.example.apptemplate.data.source.local.room.NotesDatabase
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,7 +29,7 @@ class RoomNotesRepositoryTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         notesDatabase = Room.inMemoryDatabaseBuilder(
             context, NotesDatabase::class.java
-        ).build()
+        ).allowMainThreadQueries().build()
         repository = RoomNotesRepository(notesDatabase.notesDao)
     }
 

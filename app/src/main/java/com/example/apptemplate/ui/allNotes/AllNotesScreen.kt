@@ -70,7 +70,7 @@ fun AllNotesScreen(
 
     BottomSheetScaffold(
         topBar = {
-            AllNotesAppBar(
+            AllNotesTopAppBar(
                 onDeleteAllNotesClicked = { isDeleteAllNotesDialogShown = true },
                 uiState = uiState
             )
@@ -129,7 +129,7 @@ fun AllNotesScreen(
 }
 
 @Composable
-fun AllNotesAppBar(
+fun AllNotesTopAppBar(
     onDeleteAllNotesClicked: () -> Unit,
     uiState: AllNotesUiState
 ) {

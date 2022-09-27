@@ -1,11 +1,8 @@
 package com.example.apptemplate.domain
 
 import com.example.apptemplate.data.repository.NotesRepository
-import com.example.apptemplate.data.source.local.room.NoteEntity
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
-import io.mockk.slot
+import com.example.apptemplate.fakesource.FakeNotesRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -19,25 +16,18 @@ class CreateNoteUseCaseTest {
 
     @Before
     fun setUp() {
-        repository = mockk()
+        repository = FakeNotesRepository()
         createNoteUseCase = CreateNoteUseCase(repository)
     }
 
     @Test
     fun `test create note`() = runTest {
-        val slot = slot<NoteEntity>()
-
-        coEvery { repository.insertNoteEntity(capture(slot)) } answers {}
-
         val title = "test title"
         val text = "text text"
         createNoteUseCase(title, text)
 
-        coVerify {
-            repository.insertNoteEntity(withArg {
-                assertEquals(it.title, title)
-                assertEquals(it.text, text)
-            })
-        }
+        val note = repository.notesFlow.first().first()
+        assertEquals(note.title, title)
+        assertEquals(note.text, text)
     }
 }
