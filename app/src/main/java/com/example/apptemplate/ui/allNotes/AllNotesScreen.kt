@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +49,8 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,6 +59,8 @@ import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.apptemplate.R
 import com.example.apptemplate.data.source.local.room.NoteEntity
+import com.example.apptemplate.semantics.NotesTestTags.noteItemTag
+import com.example.apptemplate.semantics.isPinned
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLifecycleComposeApi::class, ExperimentalMaterialApi::class)
@@ -116,14 +121,14 @@ fun AllNotesScreen(
                     viewModel.deleteAllNotes()
                     isDeleteAllNotesDialogShown = false
                 }) {
-                    Text(text = stringResource(R.string.delete))
+                    Text(text = stringResource(R.string.yes))
                 }
             },
             dismissButton = {
                 Button(onClick = {
                     isDeleteAllNotesDialogShown = false
                 }) {
-                    Text(text = stringResource(R.string.cancel))
+                    Text(text = stringResource(R.string.no))
                 }
             }
         )
@@ -143,7 +148,7 @@ fun AllNotesTopAppBar(
             if (uiState.pinnedNotes.isNotEmpty() || uiState.notPinnedNotes.isNotEmpty()) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.delete_notes),
                     modifier = Modifier.clickable(onClick = onDeleteAllNotesClicked)
                 )
             }
@@ -172,19 +177,18 @@ private fun AllNotesContent(
                 item {
                     NotesSectionTitle(text = stringResource(R.string.pinned_notes))
                 }
-
-                itemsIndexed(
-                    uiState.pinnedNotes,
-                    key = { _: Int, item: PinnableNote -> item.note.id }
-                ) { index, note ->
-                    val noteItemPosition = getNoteItemPosition(uiState.pinnedNotes, index)
-                    NoteItem(
-                        pinnableNote = note,
-                        position = noteItemPosition,
-                        onNoteClicked = onOpenNote,
-                        onLongPressed = onNoteFocused
-                    )
-                }
+            }
+            itemsIndexed(
+                uiState.pinnedNotes,
+                key = { _: Int, item: PinnableNote -> item.note.id }
+            ) { index, note ->
+                val noteItemPosition = getNoteItemPosition(uiState.pinnedNotes, index)
+                NoteItem(
+                    pinnableNote = note,
+                    position = noteItemPosition,
+                    onNoteClicked = onOpenNote,
+                    onLongPressed = onNoteFocused
+                )
             }
 
             item {
@@ -215,6 +219,9 @@ private fun LazyItemScope.NoteItem(
     onNoteClicked: (NoteEntity) -> Unit,
     onLongPressed: (PinnableNote) -> Unit
 ) {
+    val currentOnLongPressed by rememberUpdatedState(onLongPressed)
+    val currentOnNoteClicked by rememberUpdatedState(onNoteClicked)
+
     val shape = when (position) {
         NoteItemPosition.SINGLE_ITEM -> RoundedCornerShape(size = dimensionResource(R.dimen.sizing_small))
         NoteItemPosition.START_OF_LIST -> RoundedCornerShape(
@@ -236,12 +243,19 @@ private fun LazyItemScope.NoteItem(
             .animateItemPlacement()
     ) {
         Column(
-            Modifier
+            modifier = Modifier
+                .semantics {
+                    testTag = noteItemTag
+                    isPinned = pinnableNote.isPinned
+                    if (pinnableNote.isPinned) {
+                        println("pinned")
+                    }
+                }
                 .combinedClickable(
                     onClick = {
-                        onNoteClicked(pinnableNote.note)
+                        currentOnNoteClicked(pinnableNote.note)
                     }, onLongClick = {
-                        onLongPressed(pinnableNote)
+                        currentOnLongPressed(pinnableNote)
                     }
                 )
         ) {

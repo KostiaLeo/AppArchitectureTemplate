@@ -1,9 +1,11 @@
 package com.example.apptemplate.data.source.local.room
 
+import androidx.compose.runtime.Stable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+@Stable
 @Entity(tableName = "notes")
 data class NoteEntity(
     @ColumnInfo(name = "title") val title: String,
