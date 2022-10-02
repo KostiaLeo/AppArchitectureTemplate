@@ -89,9 +89,36 @@ class NoteDetailsScreenTest {
         }
         Espresso.closeSoftKeyboard()
 
-        composeTestRule.onNodeWithContentDescription(activity.getString(R.string.save_note)).performClick()
+        composeTestRule.onNodeWithContentDescription(activity.getString(R.string.save_note))
+            .assertIsDisplayed()
+            .performClick()
 
         val savedNote = runBlocking { notesRepository.notesFlow.first().first() }
+
+        assertEquals(title, savedNote.title)
+        assertEquals(text, savedNote.text)
+    }
+
+    @Test
+    fun testCreateNewNoteWithExisting() {
+        notesRepository.populateRepository(notesAmount = 3)
+
+        setContent(noteId = null)
+
+        val title = "Test title"
+        val text = "Test text"
+        with(composeTestRule) {
+            findTextField(R.string.type_title_hint).performTextInput(title)
+            findTextField(R.string.type_text_hint).performTextInput(text)
+        }
+        Espresso.closeSoftKeyboard()
+
+        composeTestRule.onNodeWithContentDescription(activity.getString(R.string.save_note))
+            .assertIsDisplayed()
+            .performClick()
+
+        val notes = runBlocking { notesRepository.notesFlow.first() }
+        val savedNote = notes.first()
 
         assertEquals(title, savedNote.title)
         assertEquals(text, savedNote.text)

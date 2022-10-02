@@ -15,7 +15,6 @@ fun NotesRepository.populateRepository(notesAmount: Int = 3): List<NoteEntity> {
         repeat(notesAmount) {
             insertNoteEntity(
                 NoteEntity(
-                    id = it,
                     title = "Title$it",
                     text = "Text$it",
                     timeCreatedMillis = System.currentTimeMillis() - (notesAmount - it) * 1000

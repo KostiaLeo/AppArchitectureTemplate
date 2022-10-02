@@ -155,6 +155,7 @@ class AllNotesScreenTest {
         composeTestRule.onNodeWithText(activity.getString(R.string.yes)).performClick()
         composeTestRule.onAllNodesWithTag(noteItemTag).assertCountEquals(0)
         composeTestRule.onNodeWithText(activity.getString(R.string.pinned_notes)).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(activity.getString(R.string.delete_notes)).assertDoesNotExist()
     }
 
     private fun SemanticsNodeInteraction.assertIsPinned(expected: Boolean = true) =

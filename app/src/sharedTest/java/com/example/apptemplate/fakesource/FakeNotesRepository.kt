@@ -2,6 +2,7 @@ package com.example.apptemplate.fakesource
 
 import com.example.apptemplate.data.repository.NotesRepository
 import com.example.apptemplate.data.source.local.room.NoteEntity
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -16,6 +17,8 @@ class FakeNotesRepository @Inject constructor() : NotesRepository {
             notesMap.values.sortedByDescending { it.timeLastEditedMillis }
         }
 
+    private var lastInsertedId = AtomicInteger(0) // emulate autoincrement in Room primary key
+
     override suspend fun getNoteEntityById(id: Int): Result<NoteEntity> {
         return kotlin.runCatching { _notesFlow.value[id]!! }
     }
@@ -23,7 +26,8 @@ class FakeNotesRepository @Inject constructor() : NotesRepository {
     override suspend fun insertNoteEntity(entity: NoteEntity) {
         _notesFlow.update {
             LinkedHashMap(it).apply {
-                putIfAbsent(entity.id, entity)
+                val id = lastInsertedId.getAndIncrement()
+                put(id, entity.copy(id = id))
             }
         }
     }
