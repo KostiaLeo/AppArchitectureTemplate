@@ -17,7 +17,7 @@ import com.example.apptemplate.ui.allNotes.AllNotesScreen
 import com.example.apptemplate.ui.details.NoteDetailsScreen
 
 @Composable
-fun AppNavHost(
+fun NotesAppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     startDestination: String = allNotesRoute

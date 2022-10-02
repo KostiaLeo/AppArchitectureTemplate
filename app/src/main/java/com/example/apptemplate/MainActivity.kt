@@ -3,7 +3,7 @@ package com.example.apptemplate
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.apptemplate.navigation.AppNavHost
+import com.example.apptemplate.navigation.NotesAppNavHost
 import com.google.accompanist.appcompattheme.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppCompatTheme {
-                AppNavHost()
+                NotesAppNavHost()
             }
         }
     }

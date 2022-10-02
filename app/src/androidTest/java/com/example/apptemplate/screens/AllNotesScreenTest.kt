@@ -1,4 +1,4 @@
-package com.example.apptemplate
+package com.example.apptemplate.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
@@ -18,6 +18,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import com.example.apptemplate.HiltTestActivity
+import com.example.apptemplate.R
 import com.example.apptemplate.data.preferences.NotesPreferencesRepository
 import com.example.apptemplate.data.repository.NotesRepository
 import com.example.apptemplate.data.source.local.room.NoteEntity

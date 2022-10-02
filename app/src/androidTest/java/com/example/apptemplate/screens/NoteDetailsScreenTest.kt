@@ -1,12 +1,9 @@
-package com.example.apptemplate
+package com.example.apptemplate.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -17,6 +14,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import com.example.apptemplate.HiltTestActivity
+import com.example.apptemplate.R
 import com.example.apptemplate.data.repository.NotesRepository
 import com.example.apptemplate.data.source.local.room.NoteEntity
 import com.example.apptemplate.domain.CreateNoteUseCase
@@ -25,6 +24,7 @@ import com.example.apptemplate.domain.GetNoteUseCase
 import com.example.apptemplate.navigation.NotesArguments
 import com.example.apptemplate.ui.details.NoteDetailsScreen
 import com.example.apptemplate.ui.details.NoteDetailsViewModel
+import com.example.apptemplate.utils.findTextField
 import com.example.apptemplate.utils.populateRepository
 import com.google.accompanist.appcompattheme.AppCompatTheme
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -83,9 +83,10 @@ class NoteDetailsScreenTest {
 
         val title = "Test title"
         val text = "Test text"
-        findTextField(R.string.type_title_hint).performTextInput(title)
-        findTextField(R.string.type_text_hint).performTextInput(text)
-
+        with(composeTestRule) {
+            findTextField(R.string.type_title_hint).performTextInput(title)
+            findTextField(R.string.type_text_hint).performTextInput(text)
+        }
         Espresso.closeSoftKeyboard()
 
         composeTestRule.onNodeWithContentDescription(activity.getString(R.string.save_note)).performClick()
@@ -104,10 +105,12 @@ class NoteDetailsScreenTest {
 
         val title = "Test title"
         val text = "Test text"
-        composeTestRule.onNodeWithText(noteToEdit.title).performTextClearance()
-        findTextField(R.string.type_title_hint).performTextInput(title)
-        composeTestRule.onNodeWithText(noteToEdit.text).performTextClearance()
-        findTextField(R.string.type_text_hint).performTextInput(text)
+        with(composeTestRule) {
+            onNodeWithText(noteToEdit.title).performTextClearance()
+            findTextField(R.string.type_title_hint).performTextInput(title)
+            onNodeWithText(noteToEdit.text).performTextClearance()
+            findTextField(R.string.type_text_hint).performTextInput(text)
+        }
 
         Espresso.closeSoftKeyboard()
 
@@ -130,11 +133,5 @@ class NoteDetailsScreenTest {
 
         val notes = runBlocking { notesRepository.notesFlow.first() }
         assertEquals(0, notes.size)
-    }
-
-    private fun findTextField(text: Int): SemanticsNodeInteraction {
-        return composeTestRule.onNode(
-            hasSetTextAction() and hasText(activity.getString(text))
-        )
     }
 }
