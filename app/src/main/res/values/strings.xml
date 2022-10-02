@@ -10,7 +10,7 @@
     <string name="unpin_note">Unpin</string>
     <string name="pin_note">Pin</string>
     <string name="create_note">Create note</string>
-    <string name="save_note">Create note</string>
+    <string name="save_note">Save note</string>
     <string name="edit_note">Edit note</string>
     <string name="generic_error_message">Oops, something went wrong…</string>
     <string name="empty_note_error">Note cannot be empty</string>

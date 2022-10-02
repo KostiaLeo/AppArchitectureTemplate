@@ -24,10 +24,10 @@ import com.example.apptemplate.data.source.local.room.NoteEntity
 import com.example.apptemplate.semantics.NotesTestTags.noteItemTag
 import com.example.apptemplate.semantics.isPinnedKey
 import com.example.apptemplate.ui.allNotes.AllNotesScreen
+import com.example.apptemplate.utils.populateRepository
 import com.google.accompanist.appcompattheme.AppCompatTheme
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -74,7 +74,7 @@ class AllNotesScreenTest {
 
     @Test
     fun testNotesAreDisplayed() {
-        val notes = populateRepository(notesAmount = 3)
+        val notes: List<NoteEntity> = notesRepository.populateRepository(notesAmount = 3)
 
         setContent()
 
@@ -90,7 +90,7 @@ class AllNotesScreenTest {
 
     @Test
     fun testNotesArePinned() {
-        val notes = populateRepository(notesAmount = 5)
+        val notes: List<NoteEntity> = notesRepository.populateRepository(notesAmount = 5)
 
         setContent()
 
@@ -103,7 +103,7 @@ class AllNotesScreenTest {
 
     @Test
     fun testNotesAreUnpinned() {
-        val notes = populateRepository(notesAmount = 5)
+        val notes: List<NoteEntity> = notesRepository.populateRepository(notesAmount = 5)
         runBlocking {
             launch { notesPreferencesRepository.pinNote(notes[1].id) }
             launch { notesPreferencesRepository.pinNote(notes[3].id) }
@@ -118,7 +118,7 @@ class AllNotesScreenTest {
 
     @Test
     fun testNoteIsDeleted() {
-        val notes = populateRepository(notesAmount = 1)
+        val notes: List<NoteEntity> = notesRepository.populateRepository(notesAmount = 1)
         setContent()
 
         composeTestRule.onNodeWithText(notes[0].title).performTouchInput { longClick() }
@@ -128,7 +128,7 @@ class AllNotesScreenTest {
 
     @Test
     fun testPinnedNoteIsDeleted() {
-        val notes = populateRepository(notesAmount = 2)
+        val notes: List<NoteEntity> = notesRepository.populateRepository(notesAmount = 2)
         runBlocking {
             launch { notesPreferencesRepository.pinNote(notes[1].id) }
         }
@@ -142,7 +142,7 @@ class AllNotesScreenTest {
 
     @Test
     fun testAllNotesAreDeleted() {
-        val notes = populateRepository(notesAmount = 5)
+        val notes: List<NoteEntity> = notesRepository.populateRepository(notesAmount = 5)
         runBlocking {
             launch { notesPreferencesRepository.pinNote(notes[1].id) }
             launch { notesPreferencesRepository.pinNote(notes[3].id) }
@@ -153,22 +153,6 @@ class AllNotesScreenTest {
         composeTestRule.onNodeWithText(activity.getString(R.string.yes)).performClick()
         composeTestRule.onAllNodesWithTag(noteItemTag).assertCountEquals(0)
         composeTestRule.onNodeWithText(activity.getString(R.string.pinned_notes)).assertDoesNotExist()
-    }
-
-    private fun populateRepository(notesAmount: Int = 3): List<NoteEntity> {
-        return runBlocking {
-            repeat(notesAmount) {
-                notesRepository.insertNoteEntity(
-                    NoteEntity(
-                        id = it,
-                        title = "Title$it",
-                        text = "Text$it",
-                        timeCreatedMillis = System.currentTimeMillis() - (notesAmount - it) * 1000
-                    )
-                )
-            }
-            notesRepository.notesFlow.first()
-        }
     }
 
     private fun SemanticsNodeInteraction.assertIsPinned(expected: Boolean = true) =
